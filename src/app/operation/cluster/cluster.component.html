@@ -1,0 +1,195 @@
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa fa-align-justify"></i> 当前集群列表
+        <button class="btn btn-sm btn-success pull-right" (click)="NewModal.show()">新建</button>
+      </div>
+      <div class="card-body" [ngBusy]="{busy: ListBusy, message: 'please wait...'}">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>集群名称</th>
+            <th>集群接口API</th>
+            <th>集群创建时间</th>
+            <th>描述</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <!--<tr>
+            <td>Carwyn Fachtna</td>
+            <td>2012/01/01</td>
+            <td>Member</td>
+            <td>85%</td>
+            <td>Member</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-success" (click)="DetailModal.show()">详情</button>
+              <button class="alert-danger" (click)="DeleteModal.show()">删除</button>
+            </td>
+          </tr>-->
+          <tr *ngFor="let cluster of ClusterList">
+            <td>{{cluster.name}}</td>
+            <td>{{cluster.api}}</td>
+            <td>{{cluster.created_at}}</td>
+            <td>{{cluster.description}}</td>
+            <td>
+              <button class="alert-info">详情</button>
+              <button class="alert-danger" (click)="currentCluster=cluster;DeleteModal.show()">删除</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" bsModal
+     #DetailModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">存储池详情</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="card">
+            <div class="card-body">
+              <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="text-input">存储池名称</label>
+                  <div class="col-md-9">
+                    <input type="text" id="text-input" name="text-input" class="form-control" placeholder="name">
+                    <span class="help-block"></span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">存储池配额</label>
+                  <div class="col-md-9">
+                    <input type="email" id="email-input" name="email-input" class="form-control" placeholder="quota">
+                    <span class="help-block">设置存储池最大容量，不设置则标示无上限</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="select">存储池性能</label>
+                  <div class="col-md-9">
+                    <select id="select" name="performance" class="form-control">
+                      <option value="0">Please select</option>
+                      <option value="1">高性能存储</option>
+                      <option value="2">大容量存储</option>
+                      <option value="3">更多待续。。。</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label">是否需要缓存层</label>
+                  <div class="col-md-9">
+                    <label class="radio-inline" for="inline-radio1">
+                      <input type="radio" id="inline-radio1" name="inline-radios" value="option1"> Yes
+                    </label>
+                    <label class="radio-inline" for="inline-radio2">
+                      <input type="radio" id="inline-radio2" name="inline-radios" value="option2"> No
+                    </label>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer" *ngIf="showErr">
+              {{ErrMsg}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: busy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="DetailModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="UpdatePool()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" bsModal
+     #DeleteModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel3" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">删除确认</h4>
+      </div>
+      <div class="modal-body">
+        确认要删除<strong>{{currentCluster.name}}</strong>吗？
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: DeleteBusy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="DeleteModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="DeletePool(DeleteModal)">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" bsModal
+     #NewModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel3" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">新建集群</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="card">
+            <div class="card-body">
+              <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="text-input">集群名称</label>
+                  <div class="col-md-9">
+                    <input type="text" [(ngModel)]="newCluster['name']" id="clusterName" name="clusterName" class="form-control" placeholder="cluster name">
+                    <span class="help-block">集群名称应该和真实的集群姓名一致</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">选择机柜</label>
+                  <div class="col-md-9">
+                    <input type="email" id="rack" name="rack" class="form-control" placeholder="rack">
+                    <span class="help-block">选择机房中的机柜，用以组成一个集群</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">集群管理接口</label>
+                  <div class="col-md-9">
+                    <input type="email" id="url" name="url" [(ngModel)]="newCluster['api']" class="form-control" placeholder="api">
+                    <span class="help-block">用以获取集群相关信息</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">描述</label>
+                  <div class="col-md-9">
+                    <input type="email" id="description" name="description" [(ngModel)]="newCluster['description']" class="form-control" placeholder="description">
+                    <span class="help-block">描述下集群（作用等等）</span>
+                  </div>
+                </div>
+
+              </form>
+            </div>
+            <div class="card-footer" *ngIf="showErr">
+              {{ErrMsg}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: CreateBusy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="NewModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="CreatePool(NewModal)">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

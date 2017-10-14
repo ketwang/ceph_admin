@@ -1,0 +1,231 @@
+
+<div class="row">
+  <div class="col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <i class="fa fa-align-justify"></i> 当前存储池详情
+        <button class="btn btn-sm btn-success pull-right" (click)="NewModal.show()">新建</button>
+      </div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead>
+          <tr>
+            <th>存储池名称</th>
+            <th>配额</th>
+            <th>当前使用容量</th>
+            <th>百分比</th>
+            <th>操作</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>Carwyn Fachtna</td>
+            <td>2012/01/01</td>
+            <td>Member</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-success" (click)="DetailModal.show()">详情</button>
+              <button class="alert-danger" (click)="DeleteModal.show()">删除</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Nehemiah Tatius</td>
+            <td>2012/02/01</td>
+            <td>Staff</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-info" (click)="DetailModal.show()">详情</button>
+              <button class="alert-danger">删除</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Ebbe Gemariah</td>
+            <td>2012/02/01</td>
+            <td>Admin</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-info">详情</button>
+              <button class="alert-danger">删除</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Eustorgios Amulius</td>
+            <td>2012/03/01</td>
+            <td>Member</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-info">详情</button>
+              <button class="alert-danger">删除</button>
+            </td>
+          </tr>
+          <tr>
+            <td>Leopold Gáspár</td>
+            <td>2012/01/21</td>
+            <td>Staff</td>
+            <td>85%</td>
+            <td>
+              <button class="alert-info">详情</button>
+              <button class="alert-danger">删除</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" bsModal
+     #DetailModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">存储池详情</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="card">
+            <div class="card-body">
+              <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="text-input">存储池名称</label>
+                  <div class="col-md-9">
+                    <input type="text" id="text-input" name="text-input" class="form-control" placeholder="name">
+                    <span class="help-block"></span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">存储池配额</label>
+                  <div class="col-md-9">
+                    <input type="email" id="email-input" name="email-input" class="form-control" placeholder="quota">
+                    <span class="help-block">设置存储池最大容量，不设置则标示无上限</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="select">存储池性能</label>
+                  <div class="col-md-9">
+                    <select id="select" name="performance" class="form-control">
+                      <option value="0">Please select</option>
+                      <option value="1">高性能存储</option>
+                      <option value="2">大容量存储</option>
+                      <option value="3">更多待续。。。</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label">是否需要缓存层</label>
+                  <div class="col-md-9">
+                    <label class="radio-inline" for="inline-radio1">
+                      <input type="radio" id="inline-radio1" name="inline-radios" value="option1"> Yes
+                    </label>
+                    <label class="radio-inline" for="inline-radio2">
+                      <input type="radio" id="inline-radio2" name="inline-radios" value="option2"> No
+                    </label>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer" *ngIf="showErr">
+              {{ErrMsg}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: busy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="DetailModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="UpdatePool()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" bsModal
+     #DeleteModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel3" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">删除确认</h4>
+      </div>
+      <div class="modal-body">
+        确认要删除存储池吗？
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: busy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="DeleteModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="DeletePool()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" bsModal
+     #NewModal="bs-modal" [config]="{backdrop: 'static'}"
+     tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel3" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">新建存储池</h4>
+      </div>
+      <div class="modal-body">
+        <div>
+          <div class="card">
+            <div class="card-body">
+              <form action="" method="post" enctype="multipart/form-data" class="form-horizontal">
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="text-input">存储池名称</label>
+                  <div class="col-md-9">
+                    <input type="text" id="text-input" name="text-input" class="form-control" placeholder="Text">
+                    <span class="help-block">This is a help text</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="email-input">存储池配额</label>
+                  <div class="col-md-9">
+                    <input type="email" id="email-input" name="email-input" class="form-control" placeholder="Enter Email">
+                    <span class="help-block">设置存储池最大容量，不设置则标示无上限</span>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label" for="select">存储池性能</label>
+                  <div class="col-md-9">
+                    <select id="select" name="select" class="form-control">
+                      <option value="0">Please select</option>
+                      <option value="1">高性能存储</option>
+                      <option value="2">大容量存储</option>
+                      <option value="3">更多待续。。。</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <label class="col-md-3 form-control-label">是否需要缓存层</label>
+                  <div class="col-md-9">
+                    <label class="radio-inline" for="inline-radio1">
+                      <input type="radio" id="inline-radio1" name="inline-radios" value="option1"> Yes
+                    </label>
+                    <label class="radio-inline" for="inline-radio2">
+                      <input type="radio" id="inline-radio2" name="inline-radios" value="option2"> No
+                    </label>
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="card-footer" *ngIf="showErr">
+              {{ErrMsg}}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" [ngBusy]="{busy: busy, message: 'please wait...'}">
+        <button type="button" class="btn btn-default" (click)="NewModal.hide()">Close</button>
+        <button type="button" class="btn btn-success" (click)="CreatePool()">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
