@@ -6,70 +6,34 @@
         <i class="fa fa-align-justify"></i> 当前存储池详情
         <button class="btn btn-sm btn-success pull-right" (click)="NewModal.show()">新建</button>
       </div>
-      <div class="card-body">
-        <table class="table table-sm">
-          <thead>
-          <tr>
-            <th>存储池名称</th>
-            <th>配额</th>
-            <th>当前使用容量</th>
-            <th>百分比</th>
-            <th>操作</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td>Carwyn Fachtna</td>
-            <td>2012/01/01</td>
-            <td>Member</td>
-            <td>85%</td>
-            <td>
-              <button class="alert-success" (click)="DetailModal.show()">详情</button>
-              <button class="alert-danger" (click)="DeleteModal.show()">删除</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Nehemiah Tatius</td>
-            <td>2012/02/01</td>
-            <td>Staff</td>
-            <td>85%</td>
-            <td>
-              <button class="alert-info" (click)="DetailModal.show()">详情</button>
-              <button class="alert-danger">删除</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Ebbe Gemariah</td>
-            <td>2012/02/01</td>
-            <td>Admin</td>
-            <td>85%</td>
-            <td>
-              <button class="alert-info">详情</button>
-              <button class="alert-danger">删除</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Eustorgios Amulius</td>
-            <td>2012/03/01</td>
-            <td>Member</td>
-            <td>85%</td>
-            <td>
-              <button class="alert-info">详情</button>
-              <button class="alert-danger">删除</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Leopold Gáspár</td>
-            <td>2012/01/21</td>
-            <td>Staff</td>
-            <td>85%</td>
-            <td>
-              <button class="alert-info">详情</button>
-              <button class="alert-danger">删除</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+      <div class="card-body" [ngBusy]="{busy: poolBusy, message: 'please wait...'}">
+        <div class="form-group row col-md-12">
+          <div class="col-md-4">
+            <select id="select" name="select" class="form-control" [(ngModel)]="clusterID">
+              <option *ngFor="let cluster of clusterList" value="{{cluster.id}}">{{cluster.name}}</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <table class="table table-sm">
+            <thead>
+            <tr>
+              <th>存储池名称</th>
+              <th>配额</th>
+              <th>当前使用容量</th>
+              <th>百分比</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let pool of poolList">
+              <td>{{pool.pool.pool_name}}</td>
+              <td>{{pool.pool.quota_max_bytes/1024/1204/1204 | number:'.2-2'}}GB</td>
+              <td>{{pool.kb_used/1024/1024 | number:'.2-2'}}GB</td>
+              <td>{{pool.bytes_used/pool.max_avail*100| number:'.2-2'}}%</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>

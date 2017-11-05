@@ -7,32 +7,40 @@
         <i class="fa fa-align-justify"></i> 存储池中块设备详情
         <button class="btn btn-sm btn-success pull-right" *ngIf="poolName" (click)="NewModal.show()">创建块设备</button>
       </div>
-      <div class="card-body">
+      <div class="card-body" [ngBusy]="{busy: Busy, message: 'please wait...'}">
         <div class="form-group row col-md-12">
           <div class="col-md-4">
-            <select id="select" name="select" class="form-control" [(ngModel)]="poolName">
-              <option *ngFor="let cluster of cephSummary" value="{{cluster.id}}">{{cluster.name}}</option>
+            <select id="select" name="select" class="form-control" [(ngModel)]="clusterID">
+              <option *ngFor="let cluster of clusterList" value="{{cluster.id}}">{{cluster.name}}</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <select id="select" name="select" class="form-control" [(ngModel)]="poolID">
+              <option *ngFor="let pool of poolList" value="{{pool.pool.id}}">{{pool.pool.pool_name}}</option>
             </select>
           </div>
         </div>
-        <div [ngBusy]="{busy: cephClusterBusy, message: 'please wait...'}">
+        <div>
           <table class="table table-sm">
             <thead>
             <tr>
               <th>存储池名称</th>
               <th>块设备名称</th>
-              <th>配额</th>
-              <th>当前使用容量</th>
-              <th>百分比</th>
-              <th>操作</th>
+              <th>父块设备</th>
+              <th>objects大小</th>
+              <th>objects数目</th>
+              <th>容量</th>
             </tr>
             </thead>
             <tbody>
-            <tr>
-              <!--<td>
-                <button class="alert-success" (click)="DetailModal.show()">详情</button>
-                <button class="alert-danger" (click)="DeleteModal.show()">删除</button>
-              </td>-->
+            <tr *ngFor="let image of imageList?.images">
+              <td>{{imageList.pool_name}}</td>
+              <td>{{image.name}}</td>
+              <td *ngIf="image.parent">{{image.parent.name}}</td>
+              <td *ngIf="! image.parent">{{image.parent.name}}</td>
+              <td>{{image.num_objs}}</td>
+              <td>{{image.obj_size/1024/1204}}M</td>
+              <td>{{image.size/1024/1024/1204}}G</td>
             </tr>
             </tbody>
           </table>

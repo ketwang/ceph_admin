@@ -60,7 +60,7 @@ export class ClusterComponent implements OnInit {
   public ClusterList: Array<Object>;
   ListPool() {
     this.initErr();
-    this.ListBusy = this.http.get('http://localhost:8000/cluster/list').subscribe(
+    this.ListBusy = this.http.get('http://localhost:8000/frontend/getCluster/').subscribe(
       res=> {this.ClusterList = res.json(); console.log(res)}
     );
     // this.ClusterList = res.json()

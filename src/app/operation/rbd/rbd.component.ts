@@ -9,26 +9,45 @@ import { Http } from '@angular/http';
   templateUrl: 'rbd.component.html'
 })
 export class RbdComponent implements OnInit{
-  public busy: Subscription;
-  _poolName: string;
-  set poolName(value: string) {
-    this.busy = this.http.get('http://localhost:4200').subscribe();
-    this._poolName = value;
-    console.log(this._poolName);
+
+  public Busy: Subscription;
+
+
+  public clusterList: Array<Object>;
+  public _clusterID: number;
+  set clusterID(value: number) {
+    this._clusterID = value;
+    this.listPool(value);
   }
-  get poolName(): string {
-    return this._poolName
+  public poolList: Array<Object>;
+  public _poolID: number;
+  set poolID(value: number) {
+    this._poolID = value;
+    this.listRBD(this._poolID);
   }
 
-  public cephClusterBusy: Subscription;
-  public cephSummary: Array<Object>;
+  public imageList: Array<Object>;
+
   constructor(private http:Http) { }
   public ngOnInit(){
-    this.loadCephCluster();
+    this.listCluster()
   }
-  loadCephCluster() {
-    this.cephClusterBusy = this.http.get('http://localhost:8000/cluster/list').subscribe(
-      res => {this.cephSummary = res.json();console.log(this.cephSummary)}
+  listCluster() {
+    this.http.get('http://localhost:8000/frontend/getCluster/').subscribe(
+      res => {this.clusterList = res.json(); console.log(this.clusterList)}
+    )
+  }
+
+
+  listPool(id: number) {
+    this.Busy = this.http.get('http://localhost:8000/frontend/getPools/'+id).subscribe(
+      res => {this.poolList = res.json(); console.log(this.poolList)}
+    )
+  }
+
+  listRBD(poolID: number) {
+    this.Busy = this.http.get('http://localhost:8000/frontend/getImages/'+poolID).subscribe(
+      res => {this.imageList = res.json(); console.log(this.imageList)}
     )
   }
 

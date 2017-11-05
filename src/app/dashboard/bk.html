@@ -1,0 +1,219 @@
+<div *ngIf="! showErr" class="row">
+  <div class="col-md-12" *ngIf="cephLastestCapac">
+    <div class="card">
+      <div class="card-header">
+        <strong>{{currentCluster.name}}</strong>
+      </div>
+      <div class="card-body" [ngBusy]="{busy: cephClusterDetailBusy, message: 'please wait...'}">
+        <div class="table-responsive"></div>
+        <table class="table table-responsive table-hover table-outline mb-0">
+          <thead class="thead-default">
+          <tr>
+            <th class="text-center">集群名称</th>
+            <th class="text-center">使用容量</th>
+            <th class="text-center">状态更新时间</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td class="text-center">{{currentCluster.name}}</td>
+            <td>
+              <div class="clearfix">
+                <div class="float-left">
+                  <strong>
+                    {{(cephLastestCapac.total_kb_used/cephLastestCapac.total_kb * 100) | number:'.2-2' }}%
+                  </strong>
+                </div>
+                <div class="float-right">
+                  <small class="text-muted">{{ (cephLastestCapac.total_kb_used/1024/1024) | number:'.2-2' }}GB/{{ (cephLastestCapac.total_kb/1024/1024) | number:'.2-2' }}GB</small>
+                </div>
+              </div>
+              <div class="progress progress-xs">
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="cephLastestCapac.total_kb_used/cephLastestCapac.total_kb >= 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(cephLastestCapac.total_kb_used/cephLastestCapac.total_kb * 100) | number:'.2-2' }}%"></div>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="cephLastestCapac.total_kb_used/cephLastestCapac.total_kb < 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(cephLastestCapac.total_kb_used/cephLastestCapac.total_kb * 100) | number:'.2-2' }}%"></div>
+              </div>
+            </td>
+            <td class="text-center">{{cephLastestCapac.created_at | date : 'yyyy-MM-dd HH:mm:ss'}}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="! showErr" class="row">
+  <div class="col-md-12" *ngIf="crushSet">
+    <div class="card">
+      <div class="card-header">
+        ceph的规则和最终OSD的映射关系
+      </div>
+      <div class="card-body">
+        <tree-root [nodes]="crushSet"></tree-root>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="! showErr" class="row">
+  <div class="col-md-12" *ngIf="pools">
+    <div class="card">
+      <div class="card-header">
+        存储池
+      </div>
+      <div class="card-body" [ngBusy]="{busy: cephClusterPoolDetailBusy, message: 'please wait...'}">
+        <div class="table-responsive"></div>
+        <table class="table table-responsive table-hover table-outline mb-0">
+          <thead class="thead-default">
+          <tr>
+            <th>所属集群</th>
+            <th>存储池名称</th>
+            <th>来源</th>
+            <th>存储配额</th>
+            <th>object配额</th>
+            <th class="text-center">使用状态</th>
+            <th>缓存层</th>
+            <th>pool=>osd映射规则</th>
+            <td class="text-center">更新时间</td>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let pool of pools">
+            <td>{{currentCluster.name}}</td>
+            <td>{{pool.pool.pool_name}}</td>
+            <td>{{pool.pool.comeFrom}}</td>
+            <td class="text-center">
+              <strong>{{pool.pool.quota_max_bytes/1024/1024/1024}}</strong>
+              <div class="small text-muted">0代表无限制</div>
+            </td>
+            <td>
+              <strong>{{pool.pool.quota_max_objects}}</strong>
+              <div class="small text-muted">0代表无限制</div>
+            </td>
+            <td class="text-center">
+              <div *ngIf='pool.pool.quota_max_bytes != 0' class="clearfix">
+                <div class="float-left">
+                  <strong>
+                    {{(pool.bytes_used/pool.pool.quota_max_bytes * 100) | number:'.2-2' }}%
+                  </strong>
+                </div>
+                <div class="float-right">
+                  <small class="text-muted">{{ (pool.bytes_used/1024/1024/1024) | number:'.2-2' }}GB/{{ (pool.pool.quota_max_bytes/1024/1024/1024) | number:'.2-2' }}GB</small>
+                </div>
+              </div>
+              <div class="progress progress-xs" *ngIf='pool.pool.quota_max_bytes != 0'>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.bytes_used/pool.pool.quota_max_bytes >= 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.poolCapac.bytes_used/pool.poolCapac.quota_bytes * 100) | number:'.2-2' }}%"></div>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.bytes_used/pool.pool.quota_max_bytes < 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.poolCapac.bytes_used/pool.poolCapac.quota_bytes * 100) | number:'.2-2' }}%"></div>
+              </div>
+              <div class="clearfix" *ngIf='pool.pool.quota_max_objects != 0'>
+                <div class="float-left">
+                  <strong>
+                    {{(pool.objectsNum/pool.pool.quota_max_objects * 100) | number:'.2-2' }}%
+                  </strong>
+                </div>
+                <div class="float-right">
+                  <small class="text-muted">{{ pool.objectsNum }}个/{{ pool.pool.quota_max_objects }}GB</small>
+                </div>
+              </div>
+              <div class="progress progress-xs" *ngIf='pool.pool.quota_max_objects != 0'>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.objectsNum/pool.pool.quota_max_objects >= 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.poolCapac.objectsNum/pool.poolCapac.quota_objects * 100) | number:'.2-2' }}%"></div>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.objectsNum/pool.pool.quota_max_objects < 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.poolCapac.objectsNum/pool.poolCapac.quota_objects * 100) | number:'.2-2' }}%"></div>
+              </div>
+              <div class="clearfix" *ngIf='pool.pool.quota_max_objects == 0 && pool.pool.quota_max_bytes == 0'>
+                <div class="float-left">
+                  <strong>
+                    {{(pool.bytes_used/pool.max_avail * 100) | number:'.2-2' }}%
+                  </strong>
+                </div>
+                <div class="float-right">
+                  <small class="text-muted">{{ (pool.bytes_used/1024/1024/1024) | number:'.2-2' }}GB/{{ (pool.max_avail/1024/1024/1024) | number:'.2-2' }}GB</small>
+                </div>
+              </div>
+              <div class="progress progress-xs" *ngIf='pool.pool.quota_max_objects == 0 && pool.pool.quota_max_bytes == 0'>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.bytes_used/pool.max_avail >= 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.bytes_used/pool.max_avail * 100) | number:'.2-2' }}%"></div>
+                <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="pool.bytes_used/pool.max_avail < 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{(pool.bytes_used/pool.max_avail * 100) | number:'.2-2' }}%"></div>
+              </div>
+            </td>
+            <td>
+              <span *ngIf="pool.pool.tier_pool" class="badge badge-success" tooltip="{{pool.pool.tier_pool.pool_name}}">有缓存层</span>
+              <span *ngIf="! pool.pool.tier_pool" class="badge badge-danger">无缓存层</span>
+            </td>
+            <td>
+                  <span tooltip="对应的规则集合:  {{pool.pool.rule.step1.name}}">
+                    <strong>{{pool.pool.rule.rule_name}}</strong>
+                  </span>
+            </td>
+            <td>
+              <div>存储池更新: {{pool.updated_at | date : 'yyyy-MM-dd HH:mm:ss' }}</div>
+              <div>容量数据更新: {{pool.pool.updated_at | date : 'yyyy-MM-dd HH:mm:ss'}}</div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--/.col-->
+</div>
+<div *ngIf="! showErr" class="row">
+  <div class="col-md-12" *ngIf="osds">
+    <div class="card">
+      <div class="card-header">CRUSH规则&OSD一览</div>
+      <div class="card-body" [ngBusy]="{busy: cephClusterOSDDetailBusy, message: 'please wait...'}">
+        <div class="table-responsive">
+          <table class="table table-responsive table-hover table-outline mb-0">
+            <thead class="thead-default">
+            <tr>
+              <th>所属集群</th>
+              <th>OSD名称</th>
+              <th>磁盘类型</th>
+              <th>OSD状态</th>
+              <th>OSD更新时间</th>
+              <th>使用状态</th>
+              <th>归置组数目</th>
+              <th>权重值</th>
+              <th>最后一次容量更新时间</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let osd of osds">
+              <td>{{currentCluster.name}}</td>
+              <td>osd.{{osd.osd.osd_id}}</td>
+              <td *ngIf="osd.osd.osd_class == 'ssd'"><span class="badge badge-success">{{osd.osd.osd_class}}</span></td>
+              <td *ngIf="osd.osd.osd_class == 'sata'"><span class="badge badge-info">{{osd.osd.osd_class}}</span></td>
+              <td>
+                <span *ngIf="osd.osd._in == 0" class="badge badge-danger">in</span>
+                <span *ngIf="osd.osd._in != 0" class="badge badge-success">in</span>
+                <span *ngIf="osd.osd.up == 0" class="badge badge-danger">up</span>
+                <span *ngIf="osd.osd.up != 0" class="badge badge-success">up</span>
+                <span *ngIf="osd.osd.exists == 0" class="badge badge-danger">exists</span>
+                <span *ngIf="osd.osd.exists != 0" class="badge badge-success">exists</span>
+              </td>
+              <td>{{osd.osd.updated_at | date : 'yyyy-MM-dd HH:mm:ss' }}</td>
+              <td>
+                <div class="clearfix">
+                  <div class="float-left">
+                    <strong>
+                      {{(osd.kb_used/osd.kb_avail * 100) | number:'.2-2' }}%
+                    </strong>
+                  </div>
+                  <div class="float-right">
+                    <small class="text-muted">{{ (osd.kb_used/1024/1024) | number:'.2-2' }}GB/{{ (osd.kb_avail/1024/1024) | number:'.2-2' }}GB</small>
+                  </div>
+                </div>
+                <div class="progress progress-xs">
+                  <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="osd.utilization >= 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{osd.utilization | number:'.2-2' }}%"></div>
+                  <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="50" *ngIf="osd.utilization < 0.8" class="progress-bar bg-success" role="progressbar" style="width: {{osd.utilization | number:'.2-2' }}%"></div>
+                </div>
+              </td>
+              <td>
+                <span *ngIf="osd.pgs == '0'" class="badge badge-danger">{{osd.pgs}}</span>
+                <span *ngIf="osd.pgs != '0'" class="badge badge-success">{{osd.pgs}}</span>
+              </td>
+              <td>{{osd.crush_weight}}</td>
+              <td>{{osd.updated_at | date : 'yyyy-MM-dd HH:mm:ss'}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
